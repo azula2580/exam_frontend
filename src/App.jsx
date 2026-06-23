@@ -20,7 +20,7 @@ import Profile    from './pages/Profile.jsx'
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router basename="/exam_frontend">
         <Header />
         <main className="main-content">
           <Routes>
