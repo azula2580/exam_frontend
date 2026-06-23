@@ -2,7 +2,9 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import axios from 'axios'
 
 const AuthContext = createContext(null)
-const api = axios.create({ baseURL: '/api' })
+const api = axios.create({ 
+  baseURL: `${import.meta.env.VITE_API_URL || 'https://exam-backend-hs3y.onrender.com'}/api`
+})
 api.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token')
   if (token) cfg.headers.Authorization = `Bearer ${token}`
@@ -15,7 +17,7 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      window.location.href = '/exam_frontend/login'
     }
     return Promise.reject(err)
   }
