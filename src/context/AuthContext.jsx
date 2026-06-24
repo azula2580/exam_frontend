@@ -2,16 +2,14 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import axios from 'axios'
 
 const AuthContext = createContext(null)
-const api = axios.create({ 
-  baseURL: `${import.meta.env.VITE_API_URL || 'https://exam-backend-hs3y.onrender.com'}/api`
-})
-api.interceptors.request.use(cfg => {
+
+axios.defaults.baseURL = 'https://exam-backend-hs3y.onrender.com'
+axios.interceptors.request.use(cfg => {
   const token = localStorage.getItem('token')
   if (token) cfg.headers.Authorization = `Bearer ${token}`
   return cfg
 })
-
-api.interceptors.response.use(
+axios.interceptors.response.use(
   res => res,
   err => {
     if (err.response?.status === 401) {
@@ -22,17 +20,24 @@ api.interceptors.response.use(
     return Promise.reject(err)
   }
 )
+
+const api = axios.create({
+  baseURL: 'https://exam-backend-hs3y.onrender.com/api'
+})
+api.interceptors.request.use(cfg => {
+  const token = localStorage.getItem('token')
+  if (token) cfg.headers.Authorization = `Bearer ${token}`
+  return cfg
+})
+
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(null)
+  const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const init = async () => {
       const token = localStorage.getItem('token')
-      if (!token) {
-        setLoading(false)
-        return
-      }
+      if (!token) { setLoading(false); return }
       try {
         const res = await api.get('/auth/me')
         setUser(res.data.data.user)
@@ -52,7 +57,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
     setUser(user)
-    return user  
+    return user
   }, [])
 
   const logout = useCallback(() => {
@@ -67,11 +72,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const value = {
-    user,
-    loading,
-    login,
-    logout,
-    updateUser,
+    user, loading, login, logout, updateUser,
     isAdmin:   user?.role === 'admin',
     isTeacher: user?.role === 'teacher',
     isStudent: user?.role === 'student',
