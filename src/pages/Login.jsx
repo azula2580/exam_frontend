@@ -26,7 +26,6 @@ export default function Login() {
     const { user, token } = res.data.data
     localStorage.setItem('token', token)
     localStorage.setItem('user', JSON.stringify(user))
-    
     if (user.role === 'teacher' || user.role === 'admin') {
       window.location.href = '/exam_frontend/dashboard'
     } else {
