@@ -34,9 +34,21 @@ function App() {
               </ProtectedRoute>
             }/>
 
-            <Route path="/exams" element={<ExamList />} />
-            <Route path="/exams/:id" element={<ExamDetail />} />
-            <Route path="/exams/:id/result" element={<ExamResult />} />
+            <Route path="/exams" element={
+              <ProtectedRoute roles={['teacher', 'admin', 'student']}>
+                <ExamList />
+              </ProtectedRoute>
+            }/>
+            <Route path="/exams/:id" element={
+              <ProtectedRoute roles={['teacher', 'admin', 'student']}>
+                <ExamDetail />
+              </ProtectedRoute>
+            }/>
+            <Route path="/exams/:id/result" element={
+              <ProtectedRoute roles={['teacher', 'admin', 'student']}>
+                <ExamResult />
+              </ProtectedRoute>
+            }/>
 
             <Route path="/exams/create" element={
               <ProtectedRoute roles={['teacher', 'admin']}>
@@ -56,6 +68,12 @@ function App() {
               </ProtectedRoute>
             }/>
 
+            <Route path="/" element={
+              <ProtectedRoute roles={['teacher', 'admin', 'student']}>
+                <Home />
+              </ProtectedRoute>
+            }/>
+                        
             <Route path="/students" element={
               <ProtectedRoute roles={['teacher', 'admin']}>
                 <Students />
