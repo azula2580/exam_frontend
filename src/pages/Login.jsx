@@ -1,36 +1,33 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'  // Link устгасан
-import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'  
 import '../styles/style.css'
 import '../styles/login.css'
 
 export default function Login() {
   const navigate = useNavigate()
+  const { login } = useAuth()  
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value })
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     if (!form.email || !form.password) {
-      setError('Бүх талбарыг бөглөнө үү.');
+      setError('Бүх талбарыг бөглөнө үү.')
       return
     }
     setLoading(true)
     try {
-      const res = await axios.post('/api/auth/login', form)
-      localStorage.setItem('token', res.data.data.token)
-      localStorage.setItem('user', JSON.stringify(res.data.data.user))
-      console.log(localStorage.getItem('token'))
-      console.log(localStorage.getItem('user'))
-      navigate(res.data.data.redirect || '/')
-      const role = res.data.data.user.role
-      if (role === 'teacher' || role === 'admin') {
+      const user = await login(form.email, form.password)
+      if (user.role === 'teacher' || user.role === 'admin') {
         navigate('/dashboard')
       } else {
-        navigate('/') 
-    }
+        navigate('/')
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Нэвтрэхэд алдаа гарлаа')
     } finally {
@@ -65,40 +62,22 @@ export default function Login() {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">И-мэйл хаяг</label>
-            <input
-              className="form-control"
-              type="email"
-              name="email"             
-              placeholder="example@school.mn"
-              value={form.email}
-              onChange={handleChange}
-            />
+            <input className="form-control" type="email" name="email"
+              placeholder="example@school.mn" value={form.email} onChange={handleChange}/>
           </div>
           <div className="form-group">
             <label className="form-label">Нууц үг</label>
-            <input
-              className="form-control"
-              type="password"
-              name="password"         
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-            />
-            <div style={{ textAlign: 'right', marginTop: 6 }}>
-              <a href="#" className="auth-link" style={{ fontSize: 12 }}>Нууц үг мартсан уу?</a>
+            <input className="form-control" type="password" name="password"
+              placeholder="••••••••" value={form.password} onChange={handleChange}/>
+            <div style={{ textAlign:'right', marginTop:6 }}>
+              <a href="#" className="auth-link" style={{ fontSize:12 }}>Нууц үг мартсан уу?</a>
             </div>
           </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary btn-full btn-lg"
-            disabled={loading}
-            style={{ marginTop: 4 }}
-          >
+          <button type="submit" className="btn btn-primary btn-full btn-lg"
+            disabled={loading} style={{ marginTop:4 }}>
             {loading ? 'Нэвтэрч байна...' : 'Нэвтрэх →'}
           </button>
         </form>
-
       </div>
     </div>
   )
