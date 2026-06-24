@@ -22,6 +22,7 @@ export default function Header() {
   const dropRef = useRef(null)
 
   const user = JSON.parse(localStorage.getItem('user') || '{}')
+  const isLoggedIn = !!localStorage.getItem('token') && !!user?.role  // ✅
   const initials  = (user.lastname?.[0] || '') + (user.firstname?.[0] || '')
   const fullName  = `${user.lastname || ''} ${user.firstname || ''}`.trim()
   const roleLabel = user.role === 'admin' ? 'Админ' : user.role === 'teacher' ? 'Багш' : 'Оюутан'
@@ -52,7 +53,8 @@ export default function Header() {
     }}>
       <div className="container" style={{ height:'100%', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
 
-        <Link to="/" style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
+        {/* Logo */}
+        <Link to={isLoggedIn ? '/' : '/login'} style={{ display:'flex', alignItems:'center', gap:10, textDecoration:'none' }}>
           <div style={{
             width:34, height:34, background:'var(--blue)', borderRadius:8,
             display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
@@ -70,32 +72,33 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Nav */}
-        <nav style={{ display:'flex', alignItems:'center', gap:2 }}>
-          {nav.map(n => (
-            <Link key={n.path} to={n.path} style={{
-              padding:'6px 12px', borderRadius:6,
-              fontSize:13.5, fontWeight:500,
-              color: pathname === n.path || (n.path !== '/' && pathname.startsWith(n.path))
-                ? '#fff' : 'rgba(255,255,255,0.55)',
-              background: pathname === n.path || (n.path !== '/' && pathname.startsWith(n.path))
-                ? 'rgba(27,79,216,0.35)' : 'transparent',
-              textDecoration:'none',
-            }}>
-              {n.label}
-            </Link>
-          ))}
-        </nav>
+        {/* ✅ Зөвхөн нэвтэрсэн үед nav харагдана */}
+        {isLoggedIn && (
+          <nav style={{ display:'flex', alignItems:'center', gap:2 }}>
+            {nav.map(n => (
+              <Link key={n.path} to={n.path} style={{
+                padding:'6px 12px', borderRadius:6,
+                fontSize:13.5, fontWeight:500,
+                color: pathname === n.path || (n.path !== '/' && pathname.startsWith(n.path))
+                  ? '#fff' : 'rgba(255,255,255,0.55)',
+                background: pathname === n.path || (n.path !== '/' && pathname.startsWith(n.path))
+                  ? 'rgba(27,79,216,0.35)' : 'transparent',
+                textDecoration:'none',
+              }}>
+                {n.label}
+              </Link>
+            ))}
+          </nav>
+        )}
 
-        {/* Right */}
-        <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-          {['teacher','admin'].includes(user?.role) && (
-            <Link to="/exams/create" className="btn btn-primary btn-sm">
-              + Шалгалт үүсгэх
-            </Link>
-          )}
+        {isLoggedIn ? (
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            {['teacher','admin'].includes(user?.role) && (
+              <Link to="/exams/create" className="btn btn-primary btn-sm">
+                + Шалгалт үүсгэх
+              </Link>
+            )}
 
-          {user?.role && (
             <div ref={dropRef} style={{ position:'relative' }}>
               <button onClick={() => setDropOpen(p => !p)} style={{
                 display:'flex', alignItems:'center', gap:8,
@@ -145,7 +148,7 @@ export default function Header() {
                     <div style={{ fontSize:11.5, color:'rgba(255,255,255,0.4)', marginTop:2 }}>{user.email}</div>
                   </div>
 
-                  {['teacher','admin'].includes(user?.role) && [
+                  {[
                     { to:'/profile',   icon:'👤', label:'Хувийн мэдээлэл' },
                     { to:'/dashboard', icon:'📊', label:'Хянах самбар' },
                   ].map(item => (
@@ -176,8 +179,10 @@ export default function Header() {
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div />
+        )}
       </div>
     </header>
   )
