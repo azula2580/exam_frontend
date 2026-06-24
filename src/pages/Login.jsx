@@ -13,27 +13,31 @@ export default function Login() {
 
   const handleChange = e => setForm({ ...form, [e.target.name]: e.target.value })
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setError('')
-    if (!form.email || !form.password) {
-      setError('Бүх талбарыг бөглөнө үү.')
-      return
-    }
-    setLoading(true)
-    try {
-      const user = await login(form.email, form.password)
-      if (user.role === 'teacher' || user.role === 'admin') {
-        navigate('/dashboard')
-      } else {
-        navigate('/')
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Нэвтрэхэд алдаа гарлаа')
-    } finally {
-      setLoading(false)
-    }
+ const handleSubmit = async (e) => {
+  e.preventDefault()
+  setError('')
+  if (!form.email || !form.password) {
+    setError('Бүх талбарыг бөглөнө үү.')
+    return
   }
+  setLoading(true)
+  try {
+    const res = await axios.post('https://exam-backend-hs3y.onrender.com/api/auth/login', form)
+    const { user, token } = res.data.data
+    localStorage.setItem('token', token)
+    localStorage.setItem('user', JSON.stringify(user))
+    
+    if (user.role === 'teacher' || user.role === 'admin') {
+      window.location.href = '/exam_frontend/dashboard'
+    } else {
+      window.location.href = '/exam_frontend/'
+    }
+  } catch (err) {
+    setError(err.response?.data?.message || 'Нэвтрэхэд алдаа гарлаа')
+  } finally {
+    setLoading(false)
+  }
+}
 
   return (
     <div className="auth-wrap">
